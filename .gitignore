@@ -1,0 +1,5 @@
+# Pycharm cache
+.idea/
+
+# Data
+dataset/
