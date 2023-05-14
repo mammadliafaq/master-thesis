@@ -3,3 +3,9 @@
 
 # Data
 dataset/
+
+# pycache
+__pycache__/
+
+# weights
+*.pth
