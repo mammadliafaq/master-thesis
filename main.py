@@ -46,14 +46,11 @@ def run(args: argparse.Namespace) -> None:
         lambda x: os.path.join(config.dataset.root, "train_images", x)
     )
 
-    print(data.head())
     encoder = LabelEncoder()
     data["label_group"] = encoder.fit_transform(data["label_group"])
 
     train = data[data["fold"] != 0].reset_index(drop=True)
     valid = data[data["fold"] == 0].reset_index(drop=True)
-
-    print(valid.head())
 
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 

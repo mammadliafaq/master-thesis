@@ -74,14 +74,14 @@ class ImageModel(nn.Module):
         nn.init.constant_(self.bn.bias, 0)
 
     def forward(self, x, label):
-        feature = self.extract_feat(x)
+        feature = self.extract_features(x)
         if self.loss_module in ("arcface", "cosface", "adacos"):
             logits = self.final(feature, label)
         else:
             logits = self.final(feature)
         return logits
 
-    def extract_feat(self, x):
+    def extract_features(self, x):
         batch_size = x.shape[0]
         x = self.backbone(x)
         x = self.pooling(x).view(batch_size, -1)
