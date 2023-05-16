@@ -113,6 +113,14 @@ def evaluate(args: argparse.Namespace) -> None:
         best_f1_score = sorted_list_items[-1][1]
 
         print(f"The F1 score = {best_f1_score} with best threshold = {best_threshold}")
+    else:
+        f1_score, output_df = predict_img(
+            valid, image_embeddings, threshold=config.threshold
+        )
+        print(output_df.head())
+        submit_df = output_df[["posting_id", "pred_imgonly", "target"]].copy()
+        submit_df.rename(columns={"pred_imgonly": "matches"}, inplace=True)
+        submit_df.to_csv(os.path.join(config.outdir, config.exp_name, "submission.csv"))
 
 
 def parse_arguments(argv):

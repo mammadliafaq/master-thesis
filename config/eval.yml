@@ -6,7 +6,8 @@ gpu_id: 0
 
 seed: 42
 
-search_for_threshold: True
+search_for_threshold: False
+threshold: 0.39
 
 dataset:
     root: './dataset/shopee-product-matching/'
