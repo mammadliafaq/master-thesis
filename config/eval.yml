@@ -1,4 +1,4 @@
-exp_name: 'resnet34_baseline_bs-128'
+exp_name: 'resnet34+arcface-baseline_bs-128_without-drop-out'
 outdir: './experiments'
 
 num_gpu: 1
@@ -6,7 +6,7 @@ gpu_id: 0
 
 seed: 42
 
-search_for_threshold: False
+search_for_threshold: True
 threshold: 0.39
 
 dataset:
@@ -21,10 +21,9 @@ dataset:
 model:
     model_name: 'resnet34'
     pretrained: False
-    path_to_weights: 'experiments/resnet34_baseline_bs-128/model_resnet34_arcface_val-loss-9.78_epoch-97.pth'
     use_fc: True
     fc_dim: 512
-    dropout: 0.5
+    dropout: 0.
     loss_module: 'arcface'
     "s": 30.0
     "margin": 0.50

@@ -1,4 +1,4 @@
-exp_name: 'resnet34_baseline_bs-128'
+exp_name: 'resnet34+arcface-baseline_bs-128_with-drop-out'
 outdir: './experiments'
 
 num_gpu: 1
@@ -30,7 +30,7 @@ model:
 train:
     full_training: True # Train on full data without validation
     debug: False
-    warmup: True
+    warmup: False
     optimizer:
         name: 'Adam'
         learning_rate: 0.0001
