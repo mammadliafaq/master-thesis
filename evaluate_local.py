@@ -73,7 +73,7 @@ def evaluate(args: argparse.Namespace) -> None:
         "ls_eps": config.model.ls_eps,
         "theta_zero": config.model.theta_zero,
     }
-    model = ImageModel(**model_params)
+    model = ImageModel(**model_params, device=device)
 
     checkpoint = torch.load(args.weights, map_location="cuda")
 
