@@ -103,7 +103,7 @@ def run(args: argparse.Namespace) -> None:
     }
 
     # Defining Model for specific fold
-    model = ImageModel(**model_params)
+    model = ImageModel(**model_params, device=device)
     model.to(device)
 
     # Defining criterion

@@ -8,6 +8,7 @@ class ImageModel(nn.Module):
     def __init__(
         self,
         n_classes,
+        device,
         model_name="efficientnet_b0",
         use_fc=False,
         fc_dim=512,
@@ -57,9 +58,10 @@ class ImageModel(nn.Module):
                 m=margin,
                 easy_margin=False,
                 ls_eps=ls_eps,
+                device=device
             )
         elif loss_module == "cosface":
-            self.final = CosFace(final_in_features, n_classes, s=s, m=margin)
+            self.final = CosFace(final_in_features, n_classes, s=s, m=margin, device=device)
         elif loss_module == "adacos":
             self.final = AdaCos(
                 final_in_features, n_classes, m=margin, theta_zero=theta_zero
