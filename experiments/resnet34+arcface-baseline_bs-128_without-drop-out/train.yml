@@ -1,0 +1,49 @@
+exp_name: 'resnet34+arcface-baseline_bs-128_without-drop-out'
+outdir: './experiments'
+
+num_gpu: 1
+gpu_id: 0
+
+seed: 42
+
+dataset:
+    root: './dataset/shopee-product-matching/'
+    path_to_folds: './dataset/shopee-product-matching/folds.csv'
+    num_of_classes: 11014
+    input_size: 224
+    batch_size: 128
+    num_workers: 16
+
+
+model:
+    model_name: 'resnet34'
+    pretrained: True
+    use_fc: True
+    fc_dim: 512
+    dropout: 0.
+    loss_module: 'arcface'
+    "s": 30.0
+    "margin": 0.50
+    "ls_eps": 0.0
+    "theta_zero": 0.785
+
+train:
+    full_training: True # Train on full data without validation
+    debug: False
+    warmup: False
+    optimizer:
+        name: 'Adam'
+        learning_rate: 0.0001
+        momentum: 0.9
+        weight_decay: 0.0005
+    lr_scheduler:
+        name: 'MultiStepLR'
+        step_size: 9
+        milestones: [50, 80]
+        eta_min: 0.0001
+        T_max: 4
+        gamma: 0.1
+    n_epochs: 100
+    label_smoothing: false
+    eps: 0.01
+    freq_vis: 200
