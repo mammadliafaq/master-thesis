@@ -9,7 +9,7 @@ import yaml
 from sklearn.preprocessing import LabelEncoder
 
 from dataset import ShopeeDataset
-from models.image_model import ImageModel
+from models.image_model import ImageModel, ImageTransformerModel
 from transforms import get_valid_transforms
 from utils.eval_utils import (generate_test_features, plot_threshold,
                               predict_img)
@@ -73,7 +73,7 @@ def evaluate(args: argparse.Namespace) -> None:
         "ls_eps": config.model.ls_eps,
         "theta_zero": config.model.theta_zero,
     }
-    model = ImageModel(**model_params, device=device)
+    model = ImageTransformerModel(**model_params, device=device)
 
     checkpoint = torch.load(args.weights, map_location="cuda")
 

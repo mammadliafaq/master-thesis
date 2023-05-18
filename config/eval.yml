@@ -1,4 +1,4 @@
-exp_name: 'resnet34+arcface-baseline_bs-128_without-drop-out'
+exp_name: 'vit_base_patch16_224+arcface_baseline'
 outdir: './experiments'
 
 num_gpu: 1
@@ -19,7 +19,7 @@ dataset:
 
 
 model:
-    model_name: 'resnet34'
+    model_name: 'vit_base_patch16_224'
     pretrained: False
     use_fc: True
     fc_dim: 512

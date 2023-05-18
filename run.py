@@ -11,7 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 from torch.utils.tensorboard import SummaryWriter
 
 from dataset import ShopeeDataset
-from models.image_model import ImageModel
+from models.image_model import ImageModel, ImageTransformerModel
 from train import eval_epoch, train_epoch
 from transforms import get_train_transforms, get_valid_transforms
 from utils.utils import (add_weight_decay, convert_dict_to_tuple,
@@ -103,7 +103,7 @@ def run(args: argparse.Namespace) -> None:
     }
 
     # Defining Model for specific fold
-    model = ImageModel(**model_params, device=device)
+    model = ImageTransformerModel(**model_params, device=device)
     model.to(device)
 
     # Defining criterion
@@ -139,7 +139,7 @@ def run(args: argparse.Namespace) -> None:
 
         tb.add_scalar("Val Loss", valid_loss, epoch + 1)
 
-        if valid_loss < best_loss:
+        if valid_loss <= best_loss:
             best_loss = valid_loss
             name_to_save = f"model_{config.model.model_name}_{config.model.loss_module}_val-loss-{valid_loss:.2f}_epoch-{epoch}.pth"
             path_to_weights = os.path.join(outdir, name_to_save)
