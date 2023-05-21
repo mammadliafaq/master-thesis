@@ -1,4 +1,4 @@
-exp_name: 'tf_idf'
+exp_name: 'paraphrase-xlm-r-multilingual-v1-pretrained'
 outdir: './experiments'
 
 num_gpu: 1
@@ -7,7 +7,7 @@ gpu_id: 0
 seed: 42
 
 search_for_threshold: True
-threshold: 0.94
+threshold: 0.027
 topk: 50
 
 dataset:
@@ -15,7 +15,7 @@ dataset:
     path_to_folds: './dataset/shopee-product-matching/folds.csv'
     num_of_classes: 11014
     input_size: 224
-    batch_size: 128
+    batch_size: 32
     num_workers: 16
 
 
@@ -26,11 +26,21 @@ image_model:
     fc_dim: 512
     dropout: 0.
     loss_module: 'arcface'
-    "s": 30.0
-    "margin": 0.50
-    "ls_eps": 0.0
-    "theta_zero": 0.785
+
 
 tf_idf:
     max_features: 25000
     binary: True
+
+text_model:
+    transformer_model: 'sentence-transformers/paraphrase-xlm-r-multilingual-v1'
+    'use_fc': False
+    'fc_dim': 512
+    'dropout': 0.
+    loss_module: 'softmax'
+
+head:
+    "s": 30.0
+    "margin": 0.50
+    "ls_eps": 0.0
+    "theta_zero": 0.785
