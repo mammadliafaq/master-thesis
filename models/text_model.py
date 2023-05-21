@@ -1,25 +1,25 @@
 import torch.nn as nn
-
-from .head import ArcFace, AdaCos, CosFace
-
 import transformers
+
+from .head import AdaCos, ArcFace, CosFace
 
 
 class ShopeeTextModel(nn.Module):
-
-    def __init__(self,
-                 n_classes,
-                 device,
-                 model_name='bert-base-uncased',
-                 pooling='mean_pooling',
-                 use_fc=True,
-                 fc_dim=512,
-                 dropout=0.0,
-                 loss_module='softmax',
-                 s=30.0,
-                 margin=0.50,
-                 ls_eps=0.0,
-                 theta_zero=0.785):
+    def __init__(
+        self,
+        n_classes,
+        device,
+        model_name="bert-base-uncased",
+        pooling="mean_pooling",
+        use_fc=True,
+        fc_dim=512,
+        dropout=0.0,
+        loss_module="softmax",
+        s=30.0,
+        margin=0.50,
+        ls_eps=0.0,
+        theta_zero=0.785,
+    ):
         """
         :param n_classes:
         :param model_name: name of model from pretrainedmodels
@@ -52,10 +52,12 @@ class ShopeeTextModel(nn.Module):
                 m=margin,
                 easy_margin=False,
                 ls_eps=ls_eps,
-                device=device
+                device=device,
             )
         elif loss_module == "cosface":
-            self.final = CosFace(final_in_features, n_classes, s=s, m=margin, device=device)
+            self.final = CosFace(
+                final_in_features, n_classes, s=s, m=margin, device=device
+            )
         elif loss_module == "adacos":
             self.final = AdaCos(
                 final_in_features, n_classes, m=margin, theta_zero=theta_zero
@@ -71,7 +73,7 @@ class ShopeeTextModel(nn.Module):
 
     def forward(self, input_ids, attention_mask, label):
         feature = self.extract_features(input_ids, attention_mask)
-        if self.loss_module == 'arcface':
+        if self.loss_module == "arcface":
             logits = self.final(feature, label)
         else:
             logits = self.final(feature)

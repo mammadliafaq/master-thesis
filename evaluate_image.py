@@ -8,11 +8,11 @@ import torch
 import yaml
 from sklearn.preprocessing import LabelEncoder
 
-from dataset import ShopeeDataset
-from models.image_model import ImageModel, ImageTransformerModel
+from dataset import ShopeeImageDataset
+from models.image_model import ShopeeImageModel, ShopeeImageTransformerModel
 from transforms import get_valid_transforms
-from utils.eval_utils import (generate_image_features, plot_threshold,
-                              get_image_predictions)
+from utils.eval_utils import (generate_image_features, get_image_predictions,
+                              plot_threshold)
 from utils.utils import convert_dict_to_tuple, set_seed
 
 
@@ -44,7 +44,7 @@ def evaluate(args: argparse.Namespace) -> None:
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 
     # Defining DataSet
-    valid_dataset = ShopeeDataset(
+    valid_dataset = ShopeeImageDataset(
         csv=valid,
         transforms=get_valid_transforms(config),
     )
@@ -68,12 +68,12 @@ def evaluate(args: argparse.Namespace) -> None:
         "fc_dim": config.image_model.fc_dim,
         "dropout": config.image_model.dropout,
         "loss_module": config.image_model.loss_module,
-        "s": config.image_model.s,
-        "margin": config.image_model.margin,
-        "ls_eps": config.image_model.ls_eps,
-        "theta_zero": config.image_model.theta_zero,
+        "s": config.head.s,
+        "margin": config.head.margin,
+        "ls_eps": config.head.ls_eps,
+        "theta_zero": config.head.theta_zero,
     }
-    model = ImageTransformerModel(**model_params, device=device)
+    model = ShopeeImageTransformerModel(**model_params, device=device)
 
     checkpoint = torch.load(args.weights, map_location="cuda")
 
@@ -95,7 +95,9 @@ def evaluate(args: argparse.Namespace) -> None:
             print(
                 f"*************************************** Threshold={threshold} ***************************************"
             )
-            f1_score, _ = get_image_predictions(valid, image_embeddings, threshold=threshold)
+            f1_score, _ = get_image_predictions(
+                valid, image_embeddings, threshold=threshold
+            )
             scores.append(f1_score)
             print(f"F1 score for the threshold={threshold} is {f1_score}")
 

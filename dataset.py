@@ -39,8 +39,14 @@ class ShopeeTextDataset(Dataset):
 
         text = row.title
 
-        text = self.tokenizer(text, padding='max_length', truncation=True, max_length=64, return_tensors="pt")
-        input_ids = text['input_ids'][0]
-        attention_mask = text['attention_mask'][0]
+        text = self.tokenizer(
+            text,
+            padding="max_length",
+            truncation=True,
+            max_length=64,
+            return_tensors="pt",
+        )
+        input_ids = text["input_ids"][0]
+        attention_mask = text["attention_mask"][0]
 
         return input_ids, attention_mask, torch.tensor(row.label_group)

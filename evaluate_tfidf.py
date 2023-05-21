@@ -3,16 +3,16 @@ import gc
 import os
 import sys
 
+import faiss
 import numpy as np
 import pandas as pd
 import torch
 import yaml
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from utils.eval_utils import f1_score, get_tfidf_predictions_torch, get_tfidf_predictions, plot_threshold
+from utils.eval_utils import (f1_score, get_tfidf_predictions,
+                              get_tfidf_predictions_torch, plot_threshold)
 from utils.utils import convert_dict_to_tuple, set_seed
-
-import faiss
 
 
 def read_dataset(config):
@@ -104,7 +104,9 @@ def evaluate_faiss(args: argparse.Namespace) -> None:
             print(
                 f"*************************************** Threshold={threshold} ***************************************"
             )
-            f1_score, _ = get_tfidf_predictions(df, cluster_distance, cluster_index, threshold=threshold)
+            f1_score, _ = get_tfidf_predictions(
+                df, cluster_distance, cluster_index, threshold=threshold
+            )
             scores.append(f1_score)
             print(f"F1 score for the threshold={threshold} is {f1_score}")
 

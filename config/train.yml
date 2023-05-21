@@ -1,4 +1,4 @@
-exp_name: 'vit_base_patch16_224+arcface_baseline'
+exp_name: 'test'
 outdir: './experiments'
 
 num_gpu: 1
@@ -11,7 +11,7 @@ dataset:
     path_to_folds: './dataset/shopee-product-matching/folds.csv'
     num_of_classes: 11014
     input_size: 224
-    batch_size: 64
+    batch_size: 4
     num_workers: 16
 
 
@@ -22,6 +22,8 @@ model:
     fc_dim: 512
     dropout: 0.
     loss_module: 'arcface'
+
+head:
     "s": 30.0
     "margin": 0.50
     "ls_eps": 0.0

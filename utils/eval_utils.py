@@ -1,13 +1,12 @@
+import gc
+
 import faiss
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
-
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-import gc
+from tqdm import tqdm
 
 
 def f1_score(y_true, y_pred):
@@ -64,7 +63,7 @@ def generate_text_features(model, dataloader, device):
             embeds.append(text_features)
 
     text_embeddings = np.concatenate(embeds)
-    print(f'Our text embeddings shape is {text_embeddings.shape}')
+    print(f"Our text embeddings shape is {text_embeddings.shape}")
     return text_embeddings
 
 

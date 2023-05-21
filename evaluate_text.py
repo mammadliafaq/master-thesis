@@ -5,16 +5,15 @@ import sys
 import numpy as np
 import pandas as pd
 import torch
+import transformers
 import yaml
 from sklearn.preprocessing import LabelEncoder
 
 from dataset import ShopeeTextDataset
 from models.text_model import ShopeeTextModel
-from utils.eval_utils import (generate_text_features, plot_threshold,
-                              get_text_predictions)
+from utils.eval_utils import (generate_text_features, get_text_predictions,
+                              plot_threshold)
 from utils.utils import convert_dict_to_tuple, set_seed
-
-import transformers
 
 
 def evaluate(args: argparse.Namespace) -> None:
@@ -44,7 +43,9 @@ def evaluate(args: argparse.Namespace) -> None:
 
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(config.text_model.transformer_model)
+    tokenizer = transformers.AutoTokenizer.from_pretrained(
+        config.text_model.transformer_model
+    )
 
     # Defining DataSet
     valid_dataset = ShopeeTextDataset(
@@ -101,7 +102,9 @@ def evaluate(args: argparse.Namespace) -> None:
             print(
                 f"*************************************** Threshold={threshold} ***************************************"
             )
-            f1_score, _ = get_text_predictions(valid, text_embeddings, threshold=threshold)
+            f1_score, _ = get_text_predictions(
+                valid, text_embeddings, threshold=threshold
+            )
             scores.append(f1_score)
             print(f"F1 score for the threshold={threshold} is {f1_score}")
 

@@ -10,8 +10,8 @@ import yaml
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.tensorboard import SummaryWriter
 
-from dataset import ShopeeDataset
-from models.image_model import ImageModel, ImageTransformerModel
+from dataset import ShopeeImageDataset
+from models.image_model import ShopeeImageModel, ShopeeImageTransformerModel
 from train import eval_epoch, train_epoch
 from transforms import get_train_transforms, get_valid_transforms
 from utils.utils import (add_weight_decay, convert_dict_to_tuple,
@@ -55,12 +55,12 @@ def run(args: argparse.Namespace) -> None:
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 
     # Defining DataSet
-    train_dataset = ShopeeDataset(
+    train_dataset = ShopeeImageDataset(
         csv=train,
         transforms=get_train_transforms(config),
     )
 
-    valid_dataset = ShopeeDataset(
+    valid_dataset = ShopeeImageDataset(
         csv=valid,
         transforms=get_valid_transforms(config),
     )
@@ -96,14 +96,14 @@ def run(args: argparse.Namespace) -> None:
         "fc_dim": config.model.fc_dim,
         "dropout": config.model.dropout,
         "loss_module": config.model.loss_module,
-        "s": config.model.s,
-        "margin": config.model.margin,
-        "ls_eps": config.model.ls_eps,
-        "theta_zero": config.model.theta_zero,
+        "s": config.head.s,
+        "margin": config.head.margin,
+        "ls_eps": config.head.ls_eps,
+        "theta_zero": config.head.theta_zero,
     }
 
     # Defining Model for specific fold
-    model = ImageTransformerModel(**model_params, device=device)
+    model = ShopeeImageTransformerModel(**model_params, device=device)
     model.to(device)
 
     # Defining criterion
