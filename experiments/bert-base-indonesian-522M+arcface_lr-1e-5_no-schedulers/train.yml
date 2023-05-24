@@ -1,8 +1,8 @@
-exp_name: 'bert-base-indonesian-522M+arcface+reduce-on-plateau'
+exp_name: 'bert-base-indonesian-522M+arcface_lr-1e-5_no-schedulers'
 outdir: './experiments'
 
 num_gpu: 1
-gpu_id: 0
+gpu_id: 1
 
 seed: 42
 
@@ -53,8 +53,6 @@ train:
         eta_min: 0.0001
         T_max: 4
         gamma: 0.1
-        factor: 0.1
-        patience: 10
     n_epochs: 200
     label_smoothing: false
     eps: 0.01

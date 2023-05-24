@@ -44,7 +44,7 @@ def evaluate(args: argparse.Namespace) -> None:
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
-        config.text_model.transformer_model
+        config.text_model.model_name
     )
 
     # Defining DataSet
@@ -66,7 +66,7 @@ def evaluate(args: argparse.Namespace) -> None:
     print("Creating model and loading checkpoint")
     model_params = {
         "n_classes": config.dataset.num_of_classes,
-        "model_name": config.text_model.transformer_model,
+        "model_name": config.text_model.model_name,
         "use_fc": config.text_model.use_fc,
         "fc_dim": config.text_model.fc_dim,
         "dropout": config.text_model.dropout,
@@ -95,7 +95,7 @@ def evaluate(args: argparse.Namespace) -> None:
 
     if config.search_for_threshold:
         print("Searching for the best threshold....")
-        threshold_range = np.arange(0.01, 0.1, 0.001)
+        threshold_range = np.arange(0.01, 1.0, 0.001)
         scores = []
 
         for threshold in threshold_range:

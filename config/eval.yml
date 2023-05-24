@@ -1,4 +1,4 @@
-exp_name: 'paraphrase-xlm-r-multilingual-v1-pretrained'
+exp_name: 'bert-base-indonesian-522M+arcface+reduce-on-plateau'
 outdir: './experiments'
 
 num_gpu: 1
@@ -33,11 +33,11 @@ tf_idf:
     binary: True
 
 text_model:
-    transformer_model: 'sentence-transformers/paraphrase-xlm-r-multilingual-v1'
+    model_name: 'cahya/bert-base-indonesian-522M'
     'use_fc': False
     'fc_dim': 512
     'dropout': 0.
-    loss_module: 'softmax'
+    loss_module: 'arcface'
 
 head:
     "s": 30.0
