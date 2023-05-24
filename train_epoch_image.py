@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-from utils.utils import AverageMeter, warm_up_lr, get_accuracy
+from utils.utils import AverageMeter, get_accuracy, warm_up_lr
 
 
 def train_epoch(
@@ -46,7 +46,12 @@ def train_epoch(
         acc_meter.update(accuracy.item(), batch_size)
 
         tk0.set_postfix(
-            tk0.set_postfix(Train_Loss=loss_score.avg, Train_Acc=acc_meter.avg, Epoch=epoch, LR=optimizer.param_groups[0]['lr'])
+            tk0.set_postfix(
+                Train_Loss=loss_score.avg,
+                Train_Acc=acc_meter.avg,
+                Epoch=epoch,
+                LR=optimizer.param_groups[0]["lr"],
+            )
         )
 
     if scheduler is not None:

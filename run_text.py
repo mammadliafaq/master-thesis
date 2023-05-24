@@ -6,19 +6,17 @@ import sys
 import pandas as pd
 import torch
 import torch.nn as nn
+import transformers
 import yaml
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.tensorboard import SummaryWriter
+from transformers import get_linear_schedule_with_warmup
 
 from dataset import ShopeeTextDataset
 from models.text_model import ShopeeTextModel
 from train_epoch_text import eval_epoch, train_epoch
-from utils.utils import (add_weight_decay, convert_dict_to_tuple, get_scheduler,
-                         get_optimizer, set_seed)
-
-import transformers
-
-from transformers import get_linear_schedule_with_warmup
+from utils.utils import (add_weight_decay, convert_dict_to_tuple,
+                         get_optimizer, get_scheduler, set_seed)
 
 
 def run(args: argparse.Namespace) -> None:
@@ -58,20 +56,12 @@ def run(args: argparse.Namespace) -> None:
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 
     print("Setting up the tokenizer...")
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
-        config.text_model.model_name
-    )
+    tokenizer = transformers.AutoTokenizer.from_pretrained(config.text_model.model_name)
 
     # Defining DataSet
-    train_dataset = ShopeeTextDataset(
-        csv=train,
-        tokenizer=tokenizer
-    )
+    train_dataset = ShopeeTextDataset(csv=train, tokenizer=tokenizer)
 
-    valid_dataset = ShopeeTextDataset(
-        csv=valid,
-        tokenizer=tokenizer
-    )
+    valid_dataset = ShopeeTextDataset(csv=valid, tokenizer=tokenizer)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
@@ -123,19 +113,21 @@ def run(args: argparse.Namespace) -> None:
 
     # scheduler = get_scheduler(config, optimizer)
 
-    '''
+    """
     # Defining LR SCheduler
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
         num_warmup_steps=len(train_loader) * 2,
         num_training_steps=len(train_loader) * config.train.n_epochs
     )
-    '''
+    """
 
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,
-                                                           mode="min",
-                                                           factor=config.train.lr_scheduler.factor,
-                                                           patience=config.train.lr_scheduler.patience)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer,
+        mode="min",
+        factor=config.train.lr_scheduler.factor,
+        patience=config.train.lr_scheduler.patience,
+    )
 
     # THE TRAIN LOOP
     print("Start the training!")
@@ -162,7 +154,9 @@ def run(args: argparse.Namespace) -> None:
 
         if valid_acc >= best_acc:
             best_acc = valid_acc
-            name_to_save = f"model_{config.exp_name}_val-acc-{valid_acc:.2f}_epoch-{epoch}.pth"
+            name_to_save = (
+                f"model_{config.exp_name}_val-acc-{valid_acc:.2f}_epoch-{epoch}.pth"
+            )
             path_to_weights = os.path.join(outdir, name_to_save)
             torch.save(
                 model.state_dict(),

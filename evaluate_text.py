@@ -43,9 +43,7 @@ def evaluate(args: argparse.Namespace) -> None:
 
     print(f"Data size: train shape = {train.shape[0]}, val shape = {valid.shape[0]}")
 
-    tokenizer = transformers.AutoTokenizer.from_pretrained(
-        config.text_model.model_name
-    )
+    tokenizer = transformers.AutoTokenizer.from_pretrained(config.text_model.model_name)
 
     # Defining DataSet
     valid_dataset = ShopeeTextDataset(

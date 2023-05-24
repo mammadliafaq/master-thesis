@@ -4,16 +4,13 @@ from tqdm import tqdm
 from utils.utils import AverageMeter, get_accuracy
 
 
-def train_epoch(
-    train_loader, model, criterion, optimizer, device, scheduler, epoch
-):
+def train_epoch(train_loader, model, criterion, optimizer, device, scheduler, epoch):
     model.train()
     loss_score = AverageMeter()
     acc_meter = AverageMeter()
 
     tk0 = tqdm(enumerate(train_loader), total=len(train_loader))
     for bi, d in tk0:
-
         batch_size = d[0].shape[0]
 
         input_ids = d[0]
@@ -36,7 +33,12 @@ def train_epoch(
         accuracy = get_accuracy(output.detach(), targets)
         acc_meter.update(accuracy.item(), batch_size)
 
-        tk0.set_postfix(Train_Loss=loss_score.avg, Train_Acc=acc_meter.avg, Epoch=epoch, LR=optimizer.param_groups[0]['lr'])
+        tk0.set_postfix(
+            Train_Loss=loss_score.avg,
+            Train_Acc=acc_meter.avg,
+            Epoch=epoch,
+            LR=optimizer.param_groups[0]["lr"],
+        )
 
         if scheduler is not None:
             scheduler.step()
