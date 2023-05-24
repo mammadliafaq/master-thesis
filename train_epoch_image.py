@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-from utils.utils import AverageMeter, warm_up_lr
+from utils.utils import AverageMeter, warm_up_lr, get_accuracy
 
 
 def train_epoch(
@@ -9,6 +9,7 @@ def train_epoch(
 ):
     model.train()
     loss_score = AverageMeter()
+    acc_meter = AverageMeter()
 
     NUM_EPOCH_WARM_UP = config.train.n_epochs // 25
     NUM_BATCH_WARM_UP = len(train_loader) * NUM_EPOCH_WARM_UP
@@ -41,19 +42,23 @@ def train_epoch(
         optimizer.step()
 
         loss_score.update(loss.detach().item(), batch_size)
+        accuracy = get_accuracy(output.detach(), targets)
+        acc_meter.update(accuracy.item(), batch_size)
+
         tk0.set_postfix(
-            Train_Loss=loss_score.avg, Epoch=epoch, LR=optimizer.param_groups[0]["lr"]
+            tk0.set_postfix(Train_Loss=loss_score.avg, Train_Acc=acc_meter.avg, Epoch=epoch, LR=optimizer.param_groups[0]['lr'])
         )
 
     if scheduler is not None:
         scheduler.step()
 
-    return loss_score.avg
+    return loss_score.avg, acc_meter.avg
 
 
 def eval_epoch(data_loader, model, criterion, device):
     model.eval()
     loss_score = AverageMeter()
+    acc_meter = AverageMeter()
 
     tk0 = tqdm(enumerate(data_loader), total=len(data_loader))
 
@@ -72,6 +77,9 @@ def eval_epoch(data_loader, model, criterion, device):
             loss = criterion(output, targets)
 
             loss_score.update(loss.detach().item(), batch_size)
-            tk0.set_postfix(Eval_Loss=loss_score.avg)
+            accuracy = get_accuracy(output.detach(), targets)
+            acc_meter.update(accuracy.item(), batch_size)
 
-    return loss_score.avg
+            tk0.set_postfix(Eval_Loss=loss_score.avg, Eval_Acc=acc_meter.avg)
+
+    return loss_score.avg, acc_meter.avg

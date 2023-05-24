@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from dataset import ShopeeImageDataset
 from models.image_model import ShopeeImageModel, ShopeeImageTransformerModel
-from train import eval_epoch, train_epoch
+from train_epoch_image import eval_epoch, train_epoch
 from transforms import get_train_transforms, get_valid_transforms
 from utils.utils import (add_weight_decay, convert_dict_to_tuple,
                          get_optimizer, get_scheduler, seed_worker, set_seed)
@@ -90,12 +90,12 @@ def run(args: argparse.Namespace) -> None:
 
     model_params = {
         "n_classes": config.dataset.num_of_classes,
-        "model_name": config.model.model_name,
-        "pretrained": config.model.pretrained,
-        "use_fc": config.model.use_fc,
-        "fc_dim": config.model.fc_dim,
-        "dropout": config.model.dropout,
-        "loss_module": config.model.loss_module,
+        "model_name": config.image_model.model_name,
+        "pretrained": config.image_model.pretrained,
+        "use_fc": config.image_model.use_fc,
+        "fc_dim": config.image_model.fc_dim,
+        "dropout": config.image_model.dropout,
+        "loss_module": config.image_model.loss_module,
         "s": config.head.s,
         "margin": config.head.margin,
         "ls_eps": config.head.ls_eps,
@@ -141,7 +141,7 @@ def run(args: argparse.Namespace) -> None:
 
         if valid_loss <= best_loss:
             best_loss = valid_loss
-            name_to_save = f"model_{config.model.model_name}_{config.model.loss_module}_val-loss-{valid_loss:.2f}_epoch-{epoch}.pth"
+            name_to_save = f"model_{config.image_model.model_name}_{config.image_model.loss_module}_val-loss-{valid_loss:.2f}_epoch-{epoch}.pth"
             path_to_weights = os.path.join(outdir, name_to_save)
             torch.save(
                 model.state_dict(),
