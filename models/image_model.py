@@ -4,13 +4,13 @@ import torch.nn as nn
 from .head import AdaCos, ArcFace, CosFace
 
 
-class ImageModel(nn.Module):
+class ShopeeImageModel(nn.Module):
     def __init__(
         self,
         n_classes,
         device,
         model_name="efficientnet_b0",
-        use_fc=False,
+        use_fc=True,
         fc_dim=512,
         dropout=0.0,
         loss_module="softmax",
@@ -26,7 +26,7 @@ class ImageModel(nn.Module):
             e.g. resnet50, resnext101_32x4d, pnasnet5large
         :param loss_module: One of ('arcface', 'cosface', 'softmax')
         """
-        super(ImageModel, self).__init__()
+        super(ShopeeImageModel, self).__init__()
         print("Building Model Backbone for {} model".format(model_name))
 
         self.backbone = timm.create_model(model_name, pretrained=pretrained)
@@ -61,10 +61,12 @@ class ImageModel(nn.Module):
                 m=margin,
                 easy_margin=False,
                 ls_eps=ls_eps,
-                device=device
+                device=device,
             )
         elif loss_module == "cosface":
-            self.final = CosFace(final_in_features, n_classes, s=s, m=margin, device=device)
+            self.final = CosFace(
+                final_in_features, n_classes, s=s, m=margin, device=device
+            )
         elif loss_module == "adacos":
             self.final = AdaCos(
                 final_in_features, n_classes, m=margin, theta_zero=theta_zero
@@ -99,7 +101,7 @@ class ImageModel(nn.Module):
         return x
 
 
-class ImageTransformerModel(nn.Module):
+class ShopeeImageTransformerModel(nn.Module):
     def __init__(
         self,
         n_classes,
@@ -121,7 +123,7 @@ class ImageTransformerModel(nn.Module):
             e.g. resnet50, resnext101_32x4d, pnasnet5large
         :param loss_module: One of ('arcface', 'cosface', 'softmax')
         """
-        super(ImageTransformerModel, self).__init__()
+        super(ShopeeImageTransformerModel, self).__init__()
         print("Building Model Backbone for {} model".format(model_name))
 
         self.backbone = timm.create_model(model_name, pretrained=pretrained)
@@ -146,10 +148,12 @@ class ImageTransformerModel(nn.Module):
                 m=margin,
                 easy_margin=False,
                 ls_eps=ls_eps,
-                device=device
+                device=device,
             )
         elif loss_module == "cosface":
-            self.final = CosFace(final_in_features, n_classes, s=s, m=margin, device=device)
+            self.final = CosFace(
+                final_in_features, n_classes, s=s, m=margin, device=device
+            )
         elif loss_module == "adacos":
             self.final = AdaCos(
                 final_in_features, n_classes, m=margin, theta_zero=theta_zero

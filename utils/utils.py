@@ -69,6 +69,17 @@ def get_optimizer(config, decay_parameters, no_decay_parameters):
             ],
             lr=config.train.optimizer.learning_rate,
         )
+    elif config.train.optimizer.name == "AdamW":
+        optimizer = torch.optim.AdamW(
+            [
+                {
+                    "params": decay_parameters,
+                    "weight_decay": config.train.optimizer.weight_decay,
+                },
+                {"params": no_decay_parameters},
+            ],
+            lr=config.train.optimizer.learning_rate,
+        )
     else:
         raise Exception(
             "Unknown type of optimizer: {}".format(config.train.optimizer.name)
@@ -120,3 +131,13 @@ def add_weight_decay(model, skip_list=()):
 def warm_up_lr(batch, num_batch_warm_up, init_lr, optimizer):
     for params in optimizer.param_groups:
         params["lr"] = batch * init_lr / num_batch_warm_up
+
+
+def get_accuracy(preds, targets):
+    """
+    preds shape: (batch_size, num_labels)
+    targets shape: (batch_size)
+    """
+    preds = preds.argmax(dim=1)
+    acc = (preds == targets).float().mean()
+    return acc
