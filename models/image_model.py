@@ -10,7 +10,7 @@ class ShopeeImageModel(nn.Module):
         n_classes,
         device,
         model_name="efficientnet_b0",
-        use_fc=True,
+        use_fc=False,
         fc_dim=512,
         dropout=0.0,
         loss_module="softmax",
@@ -31,13 +31,13 @@ class ShopeeImageModel(nn.Module):
 
         self.backbone = timm.create_model(model_name, pretrained=pretrained)
         if "resnet" in model_name:
-            final_in_features = self.backbone.fc.in_features
+            self.final_in_features = self.backbone.fc.in_features
             self.backbone.fc = nn.Identity()
         elif "nfnet" in model_name:
-            final_in_features = self.backbone.head.fc.in_features
+            self.final_in_features = self.backbone.head.fc.in_features
             self.backbone.head = nn.Identity()
         else:
-            final_in_features = self.backbone.classifier.in_features
+            self.final_in_features = self.backbone.classifier.in_features
             self.backbone.classifier = nn.Identity()
 
         self.backbone.global_pool = nn.Identity()
@@ -47,15 +47,15 @@ class ShopeeImageModel(nn.Module):
         self.use_fc = use_fc
         if self.use_fc:
             self.dropout = nn.Dropout(p=dropout)
-            self.fc = nn.Linear(final_in_features, fc_dim)
+            self.fc = nn.Linear(self.final_in_features, fc_dim)
             self.bn = nn.BatchNorm1d(fc_dim)
             self._init_params()
-            final_in_features = fc_dim
+            self.final_in_features = fc_dim
 
         self.loss_module = loss_module
         if loss_module == "arcface":
             self.final = ArcFace(
-                final_in_features,
+                self.final_in_features,
                 n_classes,
                 s=s,
                 m=margin,
@@ -65,14 +65,14 @@ class ShopeeImageModel(nn.Module):
             )
         elif loss_module == "cosface":
             self.final = CosFace(
-                final_in_features, n_classes, s=s, m=margin, device=device
+                self.final_in_features, n_classes, s=s, m=margin, device=device
             )
         elif loss_module == "adacos":
             self.final = AdaCos(
-                final_in_features, n_classes, m=margin, theta_zero=theta_zero
+                self.final_in_features, n_classes, m=margin, theta_zero=theta_zero
             )
         else:
-            self.final = nn.Linear(final_in_features, n_classes)
+            self.final = nn.Linear(self.final_in_features, n_classes)
 
     def _init_params(self):
         nn.init.xavier_normal_(self.fc.weight)

@@ -67,6 +67,44 @@ def generate_text_features(model, dataloader, device):
     return text_embeddings
 
 
+def generate_fused_features(image_model, text_model, multi_model, dataloader, device):
+    embeds = []
+
+    image_model.eval()
+    text_model.eval()
+    multi_model.eval()
+
+    bar = tqdm(dataloader)
+
+    with torch.no_grad():
+        for batch in bar:
+            image = batch["image"]
+            input_ids = batch["text"][0]
+            attention_mask = batch["text"][1]
+
+            images = image.to(device)
+            input_ids = input_ids.to(device)
+            attention_mask = attention_mask.to(device)
+
+            image_embedding = image_model.extract_features(images)
+            image_embedding_normalized = F.normalize(image_embedding, dim=1)
+
+            text_embeddings = text_model.extract_features(input_ids, attention_mask)
+            text_embedding_normalized = F.normalize(text_embeddings, dim=1)
+
+            fused_features = multi_model.fuse_features(
+                image_embedding_normalized, text_embedding_normalized
+            )
+
+            fused_features_normalized = F.normalize(fused_features, dim=1)
+            multimodal_features = fused_features_normalized.detach().cpu().numpy()
+            embeds.append(multimodal_features)
+
+        multimodal_embeddings = np.concatenate(embeds)
+        print(f"Our text embeddings shape is {multimodal_embeddings.shape}")
+        return multimodal_embeddings
+
+
 def get_image_predictions(df, image_embeddings, topk=50, threshold=0.63):
     df_copy = df.copy()
     N, D = image_embeddings.shape
@@ -124,6 +162,36 @@ def get_text_predictions(df, image_embeddings, topk=50, threshold=0.63):
     df_copy["pred_text_only"] = df_copy.pred_text.apply(lambda x: " ".join(x))
     df_copy["f1_text"] = f1_score(df_copy["target"], df_copy["pred_text_only"])
     score = df_copy["f1_text"].mean()
+    return score, df_copy
+
+
+def get_multimodal_predictions(df, multi_embeddings, topk=50, threshold=0.63):
+    df_copy = df.copy()
+    N, D = multi_embeddings.shape
+    cpu_index = faiss.IndexFlatL2(D)
+    gpu_index = faiss.index_cpu_to_all_gpus(cpu_index)
+    gpu_index.add(multi_embeddings)
+    cluster_distance, cluster_index = gpu_index.search(x=multi_embeddings, k=topk)
+
+    # Make predictions
+    df_copy["pred_multi"] = ""
+    model_predictions = []
+    for k in range(multi_embeddings.shape[0]):
+        idx = np.where(cluster_distance[k,] < threshold)[0]
+        ids = cluster_index[k, idx]
+        posting_ids = df_copy["posting_id"].iloc[ids].values
+        model_predictions.append(posting_ids)
+    df_copy["pred_multi"] = model_predictions
+
+    # Create target
+    tmp = df_copy.groupby("label_group").posting_id.agg("unique").to_dict()
+    df_copy["target"] = df_copy.label_group.map(tmp)
+    df_copy["target"] = df_copy["target"].apply(lambda x: " ".join(x))
+
+    # Calculate metrics
+    df_copy["pred_multi_only"] = df_copy.pred_multi.apply(lambda x: " ".join(x))
+    df_copy["f1_multi"] = f1_score(df_copy["target"], df_copy["pred_multi_only"])
+    score = df_copy["f1_multi"].mean()
     return score, df_copy
 
 
