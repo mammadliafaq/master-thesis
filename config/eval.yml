@@ -1,4 +1,4 @@
-exp_name: 'multimodal_linear-fusion'
+exp_name: 'late_fusion'
 outdir: './experiments'
 
 num_gpu: 1
@@ -22,17 +22,17 @@ dataset:
 image_model:
     model_name: 'eca_nfnet_l1'
     pretrained: False
-    use_fc: False
+    use_fc: True
     fc_dim: 512
     dropout: 0.
-    loss_module: 'softmax'
+    loss_module: 'arcface'
 
 text_model:
     'model_name': 'cahya/bert-base-indonesian-522M'
     'use_fc': False
     'fc_dim': 512
     'dropout': 0.
-    loss_module: 'softmax'
+    loss_module: 'arcface'
 
 multi:
     'use_fc': True
