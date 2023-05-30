@@ -1,4 +1,4 @@
-exp_name: 'bert-base-indonesian-522M+arcface+reduce-on-plateau'
+exp_name: 'late_fusion'
 outdir: './experiments'
 
 num_gpu: 1
@@ -20,24 +20,29 @@ dataset:
 
 
 image_model:
-    model_name: 'vit_base_patch16_224'
+    model_name: 'eca_nfnet_l1'
     pretrained: False
     use_fc: True
     fc_dim: 512
     dropout: 0.
     loss_module: 'arcface'
 
-
-tf_idf:
-    max_features: 25000
-    binary: True
-
 text_model:
-    model_name: 'cahya/bert-base-indonesian-522M'
+    'model_name': 'cahya/bert-base-indonesian-522M'
     'use_fc': False
     'fc_dim': 512
     'dropout': 0.
     loss_module: 'arcface'
+
+multi:
+    'use_fc': True
+    'fc_dim': 1920
+    'dropout': 0.
+    loss_module: 'arcface'
+
+tf_idf:
+    max_features: 25000
+    binary: True
 
 head:
     "s": 30.0

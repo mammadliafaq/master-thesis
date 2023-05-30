@@ -50,3 +50,46 @@ class ShopeeTextDataset(Dataset):
         attention_mask = text["attention_mask"][0]
 
         return input_ids, attention_mask, torch.tensor(row.label_group)
+
+
+class ShopeeMultimodalDataset(Dataset):
+    def __init__(self, csv, image_transforms=None, tokenizer=None):
+        self.csv = csv.reset_index()
+        self.augmentations = image_transforms
+        self.tokenizer = tokenizer
+
+    def __len__(self):
+        return self.csv.shape[0]
+
+    def __getitem__(self, index):
+        row = self.csv.iloc[index]
+
+        # First read image
+        image = cv2.imread(row.filepath)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        if self.augmentations:
+            augmented = self.augmentations(image=image)
+            image = augmented["image"]
+
+        # Now read text
+        text = row.title
+
+        text = self.tokenizer(
+            text,
+            padding="max_length",
+            truncation=True,
+            max_length=64,
+            return_tensors="pt",
+        )
+        input_ids = text["input_ids"][0]
+        attention_mask = text["attention_mask"][0]
+
+        return {
+            "image": image,
+            "text": (
+                input_ids,
+                attention_mask,
+            ),
+            "label": torch.tensor(row.label_group),
+        }

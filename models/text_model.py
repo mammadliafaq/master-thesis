@@ -11,7 +11,7 @@ class ShopeeTextModel(nn.Module):
         device,
         model_name="bert-base-uncased",
         pooling="mean_pooling",
-        use_fc=True,
+        use_fc=False,
         fc_dim=512,
         dropout=0.0,
         loss_module="softmax",
@@ -30,23 +30,23 @@ class ShopeeTextModel(nn.Module):
         super(ShopeeTextModel, self).__init__()
 
         self.transformer = transformers.AutoModel.from_pretrained(model_name)
-        final_in_features = self.transformer.config.hidden_size
+        self.final_in_features = self.transformer.config.hidden_size
 
         self.pooling = pooling
         self.use_fc = use_fc
 
         if use_fc:
             self.dropout = nn.Dropout(p=dropout)
-            self.fc = nn.Linear(final_in_features, fc_dim)
+            self.fc = nn.Linear(self.final_in_features, fc_dim)
             self.bn = nn.BatchNorm1d(fc_dim)
             self.relu = nn.ReLU()
             self._init_params()
-            final_in_features = fc_dim
+            self.final_in_features = fc_dim
 
         self.loss_module = loss_module
         if loss_module == "arcface":
             self.final = ArcFace(
-                final_in_features,
+                self.final_in_features,
                 n_classes,
                 s=s,
                 m=margin,
@@ -56,14 +56,14 @@ class ShopeeTextModel(nn.Module):
             )
         elif loss_module == "cosface":
             self.final = CosFace(
-                final_in_features, n_classes, s=s, m=margin, device=device
+                self.final_in_features, n_classes, s=s, m=margin, device=device
             )
         elif loss_module == "adacos":
             self.final = AdaCos(
-                final_in_features, n_classes, m=margin, theta_zero=theta_zero
+                self.final_in_features, n_classes, m=margin, theta_zero=theta_zero
             )
         else:
-            self.final = nn.Linear(final_in_features, n_classes)
+            self.final = nn.Linear(self.final_in_features, n_classes)
 
     def _init_params(self):
         nn.init.xavier_normal_(self.fc.weight)
