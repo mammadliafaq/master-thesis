@@ -195,6 +195,36 @@ def get_multimodal_predictions(df, multi_embeddings, topk=50, threshold=0.63):
     return score, df_copy
 
 
+def get_concatenated_predictions(df, concatenated_predictions, topk=50, threshold=0.63):
+    df_copy = df.copy()
+    N, D = concatenated_predictions.shape
+    cpu_index = faiss.IndexFlatL2(D)
+    gpu_index = faiss.index_cpu_to_all_gpus(cpu_index)
+    gpu_index.add(concatenated_predictions)
+    cluster_distance, cluster_index = gpu_index.search(x=concatenated_predictions, k=topk)
+
+    # Make predictions
+    df_copy["pred_concat"] = ""
+    model_predictions = []
+    for k in range(concatenated_predictions.shape[0]):
+        idx = np.where(cluster_distance[k,] < threshold)[0]
+        ids = cluster_index[k, idx]
+        posting_ids = df_copy["posting_id"].iloc[ids].values
+        model_predictions.append(posting_ids)
+    df_copy["pred_concat"] = model_predictions
+
+    # Create target
+    tmp = df_copy.groupby("label_group").posting_id.agg("unique").to_dict()
+    df_copy["target"] = df_copy.label_group.map(tmp)
+    df_copy["target"] = df_copy["target"].apply(lambda x: " ".join(x))
+
+    # Calculate metrics
+    df_copy["pred_concat_only"] = df_copy.pred_concat.apply(lambda x: " ".join(x))
+    df_copy["f1_concat"] = f1_score(df_copy["target"], df_copy["pred_concat_only"])
+    score = df_copy["f1_concat"].mean()
+    return score, df_copy
+
+
 def get_tfidf_predictions_torch(df, device, max_features=25_000, th=0.75):
     model = TfidfVectorizer(
         stop_words="english", binary=True, max_features=max_features
